@@ -41,7 +41,7 @@
         
         // สมมติว่าใน Database คุณเก็บค่าไว้ในชื่อ "test" 
         // (ถ้าชื่ออื่น เช่น "sensor1" หรือ "temp" ให้แก้คำว่า 'test' ด้านล่างนี้ครับ)
-        var pathRef = db.ref('project01'); 
+        var pathRef = db.ref('temperature'); 
 
         // คำสั่งดึงข้อมูลแบบ Realtime
         pathRef.on('value', (snapshot) => {
