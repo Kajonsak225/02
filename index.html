@@ -1,214 +1,64 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Smart Farm Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- Firebase v8 -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
-  <!-- Google Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;500;700&display=swap" rel="stylesheet">
-
-  <style>
-    * {
-      box-sizing: border-box;
-      font-family: 'Prompt', sans-serif;
-    }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      background: linear-gradient(135deg, #d4fc79, #96e6a1);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .dashboard {
-      width: 100%;
-      max-width: 900px;
-      background: #ffffffcc;
-      backdrop-filter: blur(10px);
-      border-radius: 25px;
-      padding: 30px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-    }
-
-    h1 {
-      margin: 0;
-      text-align: center;
-      color: #1b5e20;
-      font-size: 36px;
-    }
-
-    .subtitle {
-      text-align: center;
-      color: #4caf50;
-      margin-bottom: 30px;
-    }
-
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 20px;
-    }
-
-    .card {
-      background: white;
-      border-radius: 20px;
-      padding: 25px;
-      text-align: center;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-    }
-
-    .icon {
-      font-size: 48px;
-      margin-bottom: 10px;
-    }
-
-    .label {
-      font-size: 18px;
-      color: #555;
-    }
-
-    .value {
-      font-size: 42px;
-      font-weight: 700;
-      color: #2e7d32;
-      margin: 10px 0;
-    }
-
-    .unit {
-      font-size: 16px;
-      color: #777;
-    }
-
-    .status {
-      margin-top: 20px;
-      text-align: center;
-      font-size: 16px;
-      color: #d32f2f;
-    }
-
-    .control {
-      margin-top: 30px;
-      text-align: center;
-    }
-
-    .control button {
-      padding: 15px 45px;
-      font-size: 18px;
-      border: none;
-      border-radius: 30px;
-      cursor: pointer;
-      color: white;
-      background: #e53935;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-    }
-
-    footer {
-      margin-top: 20px;
-      text-align: center;
-      font-size: 14px;
-      color: #555;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP8266 Firebase Data</title>
+    
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 50px; }
+        .box { border: 2px solid #ddd; padding: 20px; border-radius: 10px; display: inline-block; }
+        h1 { color: #333; }
+        #data-value { color: #e74c3c; font-size: 40px; font-weight: bold; }
+    </style>
 </head>
-
 <body>
 
-  <div class="dashboard">
-    <h1>🌿 Smart Farm</h1>
-    <div class="subtitle">ระบบตรวจวัดสภาพแวดล้อมอัจฉริยะ</div>
-
-    <div class="cards">
-      <div class="card">
-        <div class="icon">🌡</div>
-        <div class="label">อุณหภูมิ</div>
-        <div id="temp" class="value">--</div>
-        <div class="unit">°C</div>
-      </div>
-
-      <div class="card">
-        <div class="icon">💧</div>
-        <div class="label">ความชื้นอากาศ</div>
-        <div id="humi" class="value">--</div>
-        <div class="unit">%</div>
-      </div>
-
-      <div class="card">
-        <div class="icon">🌱</div>
-        <div class="label">ความชื้นดิน</div>
-        <div id="soil" class="value">--</div>
-        <div class="unit">%</div>
-      </div>
+    <div class="box">
+        <h2>ค่าจาก Firebase</h2>
+        <div id="data-value">กำลังโหลด...</div>
     </div>
 
-    <!-- ปุ่มควบคุม (ไม่มีอุปกรณ์จริง) -->
-    <div class="control">
-      <button id="systemBtn" onclick="toggleSystem()">🔴 ระบบปิดอยู่</button>
-    </div>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
-    <div id="status" class="status"></div>
+    <script>
+        // 3. การตั้งค่า Firebase (จากรูปภาพของคุณ)
+        const firebaseConfig = {
+            apiKey: "AIzaSyCiJlcTKJqo02N5t12Tcf1iaW-vkWdCvaM",
+            authDomain: "project01-21d95.firebaseapp.com",
+            databaseURL: "https://project01-21d95-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "project01-21d95"
+        };
 
-    <footer>
-      ESP8266 + Firebase Realtime Database + GitHub Pages
-    </footer>
-  </div>
+        // เริ่มต้นการทำงาน Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
-  <script>
-    /* ===== Firebase Config ===== */
-    const firebaseConfig = {
-      apiKey: "AIzaSyCiJicTKjqo02N5tl2Tcf1iaW-vkWdCvaM",
-      authDomain: "project01-21d95.firebaseapp.com",
-      databaseURL: "https://project01-21d95-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "project01-21d95"
-    };
+        // =======================================================
+        // 4. จุดสำคัญ! แก้ไขชื่อ Node ให้ตรงกับ Database ของคุณ
+        // =======================================================
+        
+        // สมมติว่าใน Database คุณเก็บค่าไว้ในชื่อ "test" 
+        // (ถ้าชื่ออื่น เช่น "sensor1" หรือ "temp" ให้แก้คำว่า 'test' ด้านล่างนี้ครับ)
+        var pathRef = db.ref('project01'); 
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+        // คำสั่งดึงข้อมูลแบบ Realtime
+        pathRef.on('value', (snapshot) => {
+            const data = snapshot.val();
+            console.log("Data received:", data); // ดูค่าใน Console (F12)
 
-    /* ===== SENSOR DATA ===== */
-    db.ref("sensor").on("value", snapshot => {
-      if (snapshot.exists()) {
-        const d = snapshot.val();
-        document.getElementById("temp").innerText = d.temperature ?? "--";
-        document.getElementById("humi").innerText = d.humidity ?? "--";
-        document.getElementById("soil").innerText = d.soil ?? "--";
-        document.getElementById("status").innerText = "";
-      } else {
-        document.getElementById("status").innerText = "❌ ไม่พบข้อมูลจาก Firebase";
-      }
-    }, error => {
-      document.getElementById("status").innerText = "❌ เชื่อมต่อ Firebase ไม่ได้";
-      console.error(error);
-    });
+            // เช็คว่ามีข้อมูลไหม ถ้ามีให้แสดงผล
+            if (data !== null) {
+                document.getElementById("data-value").innerText = data;
+            } else {
+                document.getElementById("data-value").innerText = "ไม่พบข้อมูล (เช็คชื่อ Node)";
+            }
+        }, (error) => {
+            console.error("Error:", error);
+            document.getElementById("data-value").innerText = "Error: ดู Console";
+        });
 
-    /* ===== SYSTEM CONTROL (ซอฟต์แวร์) ===== */
-    const systemRef = db.ref("control/system");
-
-    systemRef.on("value", snap => {
-      const on = snap.val();
-      const btn = document.getElementById("systemBtn");
-
-      if (on) {
-        btn.innerText = "🟢 ระบบเปิดอยู่";
-        btn.style.background = "#43a047";
-      } else {
-        btn.innerText = "🔴 ระบบปิดอยู่";
-        btn.style.background = "#e53935";
-      }
-    });
-
-    function toggleSystem() {
-      systemRef.once("value").then(snap => {
-        systemRef.set(!snap.val());
-      });
-    }
-  </script>
-
+    </script>
 </body>
 </html>
