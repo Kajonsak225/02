@@ -62,11 +62,6 @@
       padding: 25px;
       text-align: center;
       box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-      transition: transform 0.2s;
-    }
-
-    .card:hover {
-      transform: translateY(-5px);
     }
 
     .icon {
@@ -92,10 +87,26 @@
     }
 
     .status {
-      margin-top: 25px;
+      margin-top: 20px;
       text-align: center;
       font-size: 16px;
       color: #d32f2f;
+    }
+
+    .control {
+      margin-top: 30px;
+      text-align: center;
+    }
+
+    .control button {
+      padding: 15px 45px;
+      font-size: 18px;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      color: white;
+      background: #e53935;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
     }
 
     footer {
@@ -136,32 +147,37 @@
       </div>
     </div>
 
+    <!-- ปุ่มควบคุม (ไม่มีอุปกรณ์จริง) -->
+    <div class="control">
+      <button id="systemBtn" onclick="toggleSystem()">🔴 ระบบปิดอยู่</button>
+    </div>
+
     <div id="status" class="status"></div>
 
     <footer>
-      ESP8266 + Firebase Realtime Database
+      ESP8266 + Firebase Realtime Database + GitHub Pages
     </footer>
   </div>
 
   <script>
-    // 🔥 Firebase Config (แก้เป็นของคุณ)
+    /* ===== Firebase Config ===== */
     const firebaseConfig = {
-     apiKey: "AIzaSyCiJicTKjqo02N5tl2Tcf1iaW-vkWdCvaM",
-     authDomain: "project01-21d95.firebaseapp.com",
-     databaseURL: "https://project01-21d95-default-rtdb.asia-southeast1.firebasedatabase.app",
-     projectId: "project01-21d95",
+      apiKey: "AIzaSyCiJicTKjqo02N5tl2Tcf1iaW-vkWdCvaM",
+      authDomain: "project01-21d95.firebaseapp.com",
+      databaseURL: "https://project01-21d95-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "project01-21d95"
     };
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // 📡 Real-time Listener
+    /* ===== SENSOR DATA ===== */
     db.ref("sensor").on("value", snapshot => {
       if (snapshot.exists()) {
-        const data = snapshot.val();
-        document.getElementById("temp").innerText = data.temperature ?? "--";
-        document.getElementById("humi").innerText = data.humidity ?? "--";
-        document.getElementById("soil").innerText = data.soil ?? "--";
+        const d = snapshot.val();
+        document.getElementById("temp").innerText = d.temperature ?? "--";
+        document.getElementById("humi").innerText = d.humidity ?? "--";
+        document.getElementById("soil").innerText = d.soil ?? "--";
         document.getElementById("status").innerText = "";
       } else {
         document.getElementById("status").innerText = "❌ ไม่พบข้อมูลจาก Firebase";
@@ -170,6 +186,28 @@
       document.getElementById("status").innerText = "❌ เชื่อมต่อ Firebase ไม่ได้";
       console.error(error);
     });
+
+    /* ===== SYSTEM CONTROL (ซอฟต์แวร์) ===== */
+    const systemRef = db.ref("control/system");
+
+    systemRef.on("value", snap => {
+      const on = snap.val();
+      const btn = document.getElementById("systemBtn");
+
+      if (on) {
+        btn.innerText = "🟢 ระบบเปิดอยู่";
+        btn.style.background = "#43a047";
+      } else {
+        btn.innerText = "🔴 ระบบปิดอยู่";
+        btn.style.background = "#e53935";
+      }
+    });
+
+    function toggleSystem() {
+      systemRef.once("value").then(snap => {
+        systemRef.set(!snap.val());
+      });
+    }
   </script>
 
 </body>
