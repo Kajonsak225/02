@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>Smart Farm Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Firebase v8 -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Prompt', sans-serif;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #d4fc79, #96e6a1);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .dashboard {
+      width: 100%;
+      max-width: 900px;
+      background: #ffffffcc;
+      backdrop-filter: blur(10px);
+      border-radius: 25px;
+      padding: 30px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+
+    h1 {
+      margin: 0;
+      text-align: center;
+      color: #1b5e20;
+      font-size: 36px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #4caf50;
+      margin-bottom: 30px;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 20px;
+      padding: 25px;
+      text-align: center;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+    }
+
+    .icon {
+      font-size: 48px;
+      margin-bottom: 10px;
+    }
+
+    .label {
+      font-size: 18px;
+      color: #555;
+    }
+
+    .value {
+      font-size: 42px;
+      font-weight: 700;
+      color: #2e7d32;
+      margin: 10px 0;
+    }
+
+    .unit {
+      font-size: 16px;
+      color: #777;
+    }
+
+    .status {
+      margin-top: 25px;
+      text-align: center;
+      font-size: 16px;
+      color: #d32f2f;
+    }
+
+    footer {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 14px;
+      color: #555;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="dashboard">
+    <h1>🌿 Smart Farm</h1>
+    <div class="subtitle">ระบบตรวจวัดสภาพแวดล้อมอัจฉริยะ</div>
+
+    <div class="cards">
+      <div class="card">
+        <div class="icon">🌡</div>
+        <div class="label">อุณหภูมิ</div>
+        <div id="temp" class="value">--</div>
+        <div class="unit">°C</div>
+      </div>
+
+      <div class="card">
+        <div class="icon">💧</div>
+        <div class="label">ความชื้นอากาศ</div>
+        <div id="humi" class="value">--</div>
+        <div class="unit">%</div>
+      </div>
+
+      <div class="card">
+        <div class="icon">🌱</div>
+        <div class="label">ความชื้นดิน</div>
+        <div id="soil" class="value">--</div>
+        <div class="unit">%</div>
+      </div>
+    </div>
+
+    <div id="status" class="status"></div>
+
+    <footer>
+      ESP8266 + Firebase Realtime Database
+    </footer>
+  </div>
+
+  <script>
+    // 🔥 Firebase Config (แก้เป็นของคุณ)
+    const firebaseConfig = {
+      apiKey: "API_KEY",
+      authDomain: "PROJECT_ID.firebaseapp.com",
+      databaseURL: "https://PROJECT_ID-default-rtdb.firebaseio.com",
+      projectId: "PROJECT_ID",
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // 📡 Real-time Listener
+    db.ref("sensor").on("value", snapshot => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        document.getElementById("temp").innerText = data.temperature ?? "--";
+        document.getElementById("humi").innerText = data.humidity ?? "--";
+        document.getElementById("soil").innerText = data.soil ?? "--";
+        document.getElementById("status").innerText = "";
+      } else {
+        document.getElementById("status").innerText = "❌ ไม่พบข้อมูลจาก Firebase";
+      }
+    }, error => {
+      document.getElementById("status").innerText = "❌ เชื่อมต่อ Firebase ไม่ได้";
+      console.error(error);
+    });
+  </script>
+
+</body>
+</html>
