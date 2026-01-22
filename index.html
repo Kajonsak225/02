@@ -4,36 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Farm Dashboard</title>
+
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
-    
+
     <style>
-        /* 1. ส่วนตกแต่งหน้าตา (CSS) */
         body {
             margin: 0;
-            padding: 0;
             font-family: 'Prompt', sans-serif;
-            background: linear-gradient(135deg, #a8ff78, #78ffd6); /* พื้นหลังสีเขียวไล่เฉด */
+            background: linear-gradient(135deg, #a8ff78, #78ffd6);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            color: #333;
         }
 
         .container {
-            background-color: rgba(255, 255, 255, 0.9);
+            background: rgba(255,255,255,0.9);
             padding: 40px;
             border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            text-align: center;
-            max-width: 900px;
             width: 90%;
+            max-width: 900px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
 
-        h1 { margin-bottom: 5px; color: #2e7d32; }
+        h1 { color: #2e7d32; margin-bottom: 5px; }
         .subtitle { color: #666; margin-bottom: 30px; }
 
-        /* กล่องการ์ด 3 ใบ */
         .card-container {
             display: flex;
             justify-content: center;
@@ -47,133 +44,88 @@
             padding: 20px;
             width: 200px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-            transition: transform 0.2s;
-        }
-        
-        .card:hover { transform: translateY(-5px); }
-
-        .icon { font-size: 50px; margin-bottom: 10px; display: block; }
-        
-        /* ตัวเลขที่จะแสดงผล */
-        .value { 
-            font-size: 48px; 
-            font-weight: bold; 
-            color: #2e7d32; 
-            margin: 10px 0;
         }
 
-        .unit { font-size: 18px; color: #888; }
+        .icon { font-size: 50px; }
+        .value { font-size: 42px; font-weight: bold; color: #2e7d32; }
+        .unit { color: #888; }
 
-        /* ปุ่มสถานะ */
-        .status-btn {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 30px;
-            border-radius: 50px;
-            border: none;
-            font-size: 16px;
-            margin-top: 30px;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .status-dot {
-            height: 12px;
-            width: 12px;
-            background-color: #fff;
-            border-radius: 50%;
-            display: inline-block;
+        .status {
+            margin-top: 20px;
+            font-size: 14px;
         }
     </style>
 </head>
+
 <body>
 
-    <div class="container">
-        <h1>🌿 Smart Farm</h1>
-        <p class="subtitle">ระบบตรวจวัดสภาพแวดล้อมอัจฉริยะ</p>
+<div class="container">
+    <h1>🌿 Smart Farm</h1>
+    <p class="subtitle">ระบบตรวจวัดสภาพแวดล้อมอัจฉริยะ</p>
 
-        <div class="card-container">
-            <div class="card">
-                <span class="icon">🌡️</span>
-                <h3>อุณหภูมิ</h3>
-                <div id="temp" class="value">--</div>
-                <div class="unit">°C</div>
-            </div>
-
-            <div class="card">
-                <span class="icon">💧</span>
-                <h3>ความชื้นอากาศ</h3>
-                <div id="humid" class="value">--</div>
-                <div class="unit">%</div>
-            </div>
-
-            <div class="card">
-                <span class="icon">🌱</span>
-                <h3>ความชื้นดิน</h3>
-                <div id="soil" class="value">--</div>
-                <div class="unit">%</div>
-            </div>
+    <div class="card-container">
+        <div class="card">
+            <div class="icon">🌡️</div>
+            <h3>อุณหภูมิ</h3>
+            <div id="temp" class="value">--</div>
+            <div class="unit">°C</div>
         </div>
 
-        <button class="status-btn">
-            <span class="status-dot"></span> ระบบเปิดอยู่
-        </button>
-        
-        <p style="margin-top:20px; font-size: 12px; color: #999;">
-            สถานะการเชื่อมต่อ: <span id="conn-status">กำลังเชื่อมต่อ...</span>
-        </p>
+        <div class="card">
+            <div class="icon">💧</div>
+            <h3>ความชื้นอากาศ</h3>
+            <div id="humid" class="value">--</div>
+            <div class="unit">%</div>
+        </div>
+
+        <div class="card">
+            <div class="icon">🌱</div>
+            <h3>ความชื้นดิน</h3>
+            <div id="soil" class="value">--</div>
+            <div class="unit">%</div>
+        </div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <div id="conn-status" class="status">กำลังเชื่อมต่อ Firebase...</div>
+</div>
 
-    <script>
-        // ตั้งค่า Firebase (ข้อมูลของคุณ)
-        const firebaseConfig = {
-            apiKey: "AIzaSyCiJlcTKJqo02N5t12Tcf1iaW-vkWdCvaM",
-            authDomain: "project01-21d95.firebaseapp.com",
-            databaseURL: "https://project01-21d95-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "project01-21d95"
-        };
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
-        // เริ่มต้น Firebase
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-        const statusText = document.getElementById("conn-status");
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyCiJicTKjqo02N5tl2Tcf1iaW-vkWdCvaM",
+        authDomain: "project01-21d95.firebaseapp.com",
+        databaseURL: "https://project01-21d95-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "project01-21d95"
+    };
 
-        // ฟังก์ชันดึงข้อมูล (3 ค่า)
-        function startListening() {
-            
-            // 1. ดึงค่า อุณหภูมิ (temperature)
-            db.ref('temperature').on('value', (snapshot) => {
-                if(snapshot.exists()) {
-                    document.getElementById("temp").innerText = snapshot.val();
-                    statusText.innerText = "✅ เชื่อมต่อแล้ว (รับข้อมูลล่าสุด)";
-                    statusText.style.color = "green";
-                }
-            });
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-            // 2. ดึงค่า ความชื้นอากาศ (humidity)
-            db.ref('humidity').on('value', (snapshot) => {
-                if(snapshot.exists()) {
-                    document.getElementById("humid").innerText = snapshot.val();
-                }
-            });
+    const statusText = document.getElementById("conn-status");
 
-            // 3. ดึงค่า ความชื้นดิน (soil)
-            db.ref('soil').on('value', (snapshot) => {
-                if(snapshot.exists()) {
-                    document.getElementById("soil").innerText = snapshot.val();
-                } else {
-                    // ถ้ายังไม่มีค่า soil ใน database
-                    document.getElementById("soil").innerText = "รอค่า";
-                }
-            });
+    // ✅ ฟังข้อมูลจาก sensor (ถูกต้อง)
+    db.ref("sensor").on("value", snapshot => {
+        if (snapshot.exists()) {
+            const data = snapshot.val();
+
+            document.getElementById("temp").innerText  = data.temperature ?? "--";
+            document.getElementById("humid").innerText = data.humidity ?? "--";
+            document.getElementById("soil").innerText  = data.soil ?? "--";
+
+            statusText.innerText = "✅ เชื่อมต่อแล้ว (Real-time)";
+            statusText.style.color = "green";
+        } else {
+            statusText.innerText = "❌ ไม่พบข้อมูล sensor";
+            statusText.style.color = "red";
         }
+    }, error => {
+        statusText.innerText = "❌ เชื่อมต่อ Firebase ไม่ได้";
+        console.error(error);
+    });
+</script>
 
-        // เริ่มทำงาน
-        startListening();
-    </script>
 </body>
 </html>
